@@ -10,10 +10,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.byc</groupId>
-    <artifactId>springboot-init</artifactId>
+    <artifactId>buapi-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>springboot-init</name>
-    <description>springboot 初始项目</description>
+    <name>buapi-backend</name>
+    <description>接口平台</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>
