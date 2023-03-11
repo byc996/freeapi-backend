@@ -1,21 +1,17 @@
-package com.byc.buinterface.client;
+package com.byc.clientsdk.client;
 
-import cn.hutool.core.io.resource.Resource;
-import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.crypto.digest.DigestAlgorithm;
-import cn.hutool.crypto.digest.Digester;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
-import com.byc.buinterface.model.User;
+import com.byc.clientsdk.model.User;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.byc.buinterface.utils.SignUtils.getSign;
+import static com.byc.clientsdk.utils.SignUtils.getSign;
 
 
 /**
