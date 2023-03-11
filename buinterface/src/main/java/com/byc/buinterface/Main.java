@@ -1,7 +1,8 @@
 package com.byc.buinterface;
 
-import com.byc.buinterface.client.BuClient;
-import com.byc.buinterface.model.User;
+
+import com.byc.clientsdk.client.BuClient;
+import com.byc.clientsdk.model.User;
 
 public class Main {
     public static void main(String[] args) {

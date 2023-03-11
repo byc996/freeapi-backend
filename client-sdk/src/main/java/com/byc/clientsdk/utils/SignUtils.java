@@ -1,9 +1,7 @@
-package com.byc.buinterface.utils;
+package com.byc.clientsdk.utils;
 
 import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.crypto.digest.Digester;
-
-import java.util.Map;
 
 public class SignUtils {
 

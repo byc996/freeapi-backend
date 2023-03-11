@@ -1,7 +1,8 @@
 package com.byc.buinterface.controller;
 
-import com.byc.buinterface.model.User;
-import com.byc.buinterface.utils.SignUtils;
+
+import com.byc.clientsdk.model.User;
+import com.byc.clientsdk.utils.SignUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
