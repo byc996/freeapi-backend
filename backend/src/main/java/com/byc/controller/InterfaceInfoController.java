@@ -3,19 +3,20 @@ package com.byc.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.byc.annotation.AuthCheck;
-import com.byc.common.BaseResponse;
-import com.byc.common.DeleteRequest;
-import com.byc.common.ErrorCode;
-import com.byc.common.ResultUtils;
+import com.byc.clientsdk.client.BuClient;
+import com.byc.common.*;
 import com.byc.constant.CommonConstant;
 import com.byc.exception.BusinessException;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoAddRequest;
+import com.byc.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.byc.model.entity.InterfaceInfo;
 import com.byc.model.entity.User;
+import com.byc.model.enums.InterfaceInfoStatusEnum;
 import com.byc.service.InterfaceInfoService;
 import com.byc.service.UserService;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -40,6 +41,9 @@ public class InterfaceInfoController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private BuClient buClient;
 
     // region 增删改查
 
@@ -196,4 +200,110 @@ public class InterfaceInfoController {
 
     // endregion
 
+    /**
+     * 发布
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/open")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Boolean> openInterfaceInfo(@RequestBody IdRequest idRequest,
+                                                     HttpServletRequest request) {
+
+        if (idRequest == null || idRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 判断是否存在
+        long id = idRequest.getId();
+        InterfaceInfo oldInterfaceInfo = interfaceinfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // 判断是否可以调用
+        com.byc.clientsdk.model.User user = new com.byc.clientsdk.model.User();
+        user.setUsername("test");
+        String username;
+        try {
+            username = buClient.getUsernameByPost(user);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        if (StringUtils.isBlank(username)){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
+        }
+        // 仅本人或管理员可修改
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        interfaceInfo.setId(id);
+        interfaceInfo.setStatus(InterfaceInfoStatusEnum.OPEN.getValue());
+        boolean result = interfaceinfoService.updateById(interfaceInfo);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 下线
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/close")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Boolean> closeInterfaceInfo(@RequestBody IdRequest idRequest,
+                                                     HttpServletRequest request) {
+        if (idRequest == null || idRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 判断是否存在
+        long id = idRequest.getId();
+        InterfaceInfo oldInterfaceInfo = interfaceinfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // 仅本人或管理员可修改
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        interfaceInfo.setId(id);
+        interfaceInfo.setStatus(InterfaceInfoStatusEnum.CLOSED .getValue());
+        boolean result = interfaceinfoService.updateById(interfaceInfo);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 调用
+     *
+     * @param interfaceInfoInvokeRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/invoke")
+    public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+                                                    HttpServletRequest request) {
+        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 判断是否存在
+        long id = interfaceInfoInvokeRequest.getId();
+        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        InterfaceInfo oldInterfaceInfo = interfaceinfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.CLOSED.getValue()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
+        }
+
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        Gson gson = new Gson();
+        // todo 根据不同的url 调用不同的方法
+
+        com.byc.clientsdk.model.User user = gson.fromJson(userRequestParams, com.byc.clientsdk.model.User.class);
+        BuClient tempClient = new BuClient(accessKey, secretKey);
+        String usernameByPost = tempClient.getUsernameByPost(user);
+//        String usernameByPost = buClient.getUsernameByPost(user);
+        return ResultUtils.success(usernameByPost);
+    }
 }
