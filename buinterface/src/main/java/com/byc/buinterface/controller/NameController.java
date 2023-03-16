@@ -11,13 +11,13 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/name")
 public class NameController {
 
-    @GetMapping("/")
-    public String getName(String name) {
-
+    @GetMapping("/get")
+    public String getName(String name, HttpServletRequest request) {
+        System.out.println(request.getHeader("gateway"));
         return "GET Your name is :" + name;
     }
 
-    @PostMapping("/")
+    @PostMapping("/post")
     public String getNamePost(@RequestParam String name) {
         return "POST Your name is :" + name;
     }
@@ -43,6 +43,9 @@ public class NameController {
         if (!sign.equals(serverSign)) {
             throw new RuntimeException("无权限");
         }
-        return " POST Username is :" + user.getUsername();
+        String result = " POST Username is :" + user.getUsername();
+
+        // 调用成功后， 次数 + 1
+        return result;
     }
 }

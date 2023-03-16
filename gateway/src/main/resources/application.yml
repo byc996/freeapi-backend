@@ -1,0 +1,23 @@
+server:
+  port: 8002
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: api_route
+          uri: http://localhost:8001
+          predicates:
+            - Path=/api/**
+          filters:
+            - AddRequestHeader=gateway, 123456
+            - AddRequestParameter=color, blue
+
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: trace
+
+
