@@ -60,7 +60,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         String timestamp = headers.getFirst("timestamp");
         String sign = headers.getFirst("sign");
         String body = headers.getFirst("body");
-        // todo 数据库中查
+        // todo 数据库中查ak是否已分配给用户
         if (!accessKey.equals("harvey")) {
             return handleNoAuth(response);
         }

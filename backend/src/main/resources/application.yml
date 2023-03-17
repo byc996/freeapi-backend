@@ -37,3 +37,9 @@ buapi:
   client:
     access-key: harvey
     secret-key: 12345678
+
+dubbo:
+  application:
+    name: dubbo-springboot-demo-provider
+  registry:
+    address: nacos://localhost:8848
