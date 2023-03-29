@@ -1,4 +1,4 @@
-package com.byc.model.entity;
+package com.byc.common.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

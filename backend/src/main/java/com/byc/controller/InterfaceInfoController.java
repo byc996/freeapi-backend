@@ -5,14 +5,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.byc.annotation.AuthCheck;
 import com.byc.clientsdk.client.BuClient;
 import com.byc.common.*;
+import com.byc.common.model.entity.InterfaceInfo;
+import com.byc.common.model.entity.User;
 import com.byc.constant.CommonConstant;
 import com.byc.exception.BusinessException;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoAddRequest;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
-import com.byc.model.entity.InterfaceInfo;
-import com.byc.model.entity.User;
+
 import com.byc.model.enums.InterfaceInfoStatusEnum;
 import com.byc.service.InterfaceInfoService;
 import com.byc.service.UserService;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -298,12 +300,30 @@ public class InterfaceInfoController {
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
         Gson gson = new Gson();
-        // todo 根据不同的url 调用不同的方法
-
-        com.byc.clientsdk.model.User user = gson.fromJson(userRequestParams, com.byc.clientsdk.model.User.class);
+        // 根据不同的url 调用不同的方法
         BuClient tempClient = new BuClient(accessKey, secretKey);
-        String usernameByPost = tempClient.getUsernameByPost(user);
+        String methodName = oldInterfaceInfo.getName();
+        Object result = null;
+        try {
+//            Method method = tempClient.getClass().getMethod(methodName);
+            for (Method method : tempClient.getClass().getMethods()) {
+                if (method.getName().equals(methodName)){
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    Object args = gson.fromJson(userRequestParams, parameterTypes[0]);
+                    result = method.invoke(tempClient, args);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return ResultUtils.success(result);
+
+//        com.byc.clientsdk.model.User user = gson.fromJson(userRequestParams, com.byc.clientsdk.model.User.class);
+//        BuClient tempClient = new BuClient(accessKey, secretKey);
+//        String usernameByPost = tempClient.getUsernameByPost(user);
 //        String usernameByPost = buClient.getUsernameByPost(user);
-        return ResultUtils.success(usernameByPost);
+//        return ResultUtils.success(usernameByPost);
     }
+
 }

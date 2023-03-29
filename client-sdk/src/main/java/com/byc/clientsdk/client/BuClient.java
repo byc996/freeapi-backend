@@ -5,6 +5,8 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
+import com.byc.clientsdk.model.Domain;
+import com.byc.clientsdk.model.IP;
 import com.byc.clientsdk.model.User;
 
 import java.nio.charset.StandardCharsets;
@@ -73,5 +75,24 @@ public class BuClient {
         return map;
     }
 
+    public String getDomainStatus(Domain domain) {
+        //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
+        String json = JSONUtil.toJsonStr(domain);
+        HttpResponse response = HttpRequest.get(GATEWAY_HOST + "/api/domain/exist")
+                .addHeaders(getHeaders(json) )
+                .body(json)
+                .execute();
+//        System.out.println(result);
+        return response.body();
+    }
+
+    public String getIPInfo(IP ip) {
+        String json = JSONUtil.toJsonStr(ip);
+        HttpResponse response = HttpRequest.get(GATEWAY_HOST + "/api/domain/ip")
+                .addHeaders(getHeaders(json) )
+                .body(json)
+                .execute();
+        return response.body();
+    }
 
 }

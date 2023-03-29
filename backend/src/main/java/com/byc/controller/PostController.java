@@ -7,13 +7,13 @@ import com.byc.common.BaseResponse;
 import com.byc.common.DeleteRequest;
 import com.byc.common.ErrorCode;
 import com.byc.common.ResultUtils;
+import com.byc.common.model.entity.User;
 import com.byc.constant.CommonConstant;
 import com.byc.exception.BusinessException;
 import com.byc.model.dto.post.PostAddRequest;
 import com.byc.model.dto.post.PostQueryRequest;
 import com.byc.model.dto.post.PostUpdateRequest;
 import com.byc.model.entity.Post;
-import com.byc.model.entity.User;
 import com.byc.service.PostService;
 import com.byc.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -151,7 +151,7 @@ public class PostController {
      */
     @AuthCheck(mustRole = "admin")
     @GetMapping("/list")
-    public BaseResponse<List<Post>> listPost(PostQueryRequest postQueryRequest) {
+    public BaseResponse<List<Post>> listPost(@RequestBody PostQueryRequest postQueryRequest) {
         Post postQuery = new Post();
         if (postQueryRequest != null) {
             BeanUtils.copyProperties(postQueryRequest, postQuery);
@@ -169,7 +169,7 @@ public class PostController {
      * @return
      */
     @GetMapping("/list/page")
-    public BaseResponse<Page<Post>> listPostByPage(PostQueryRequest postQueryRequest, HttpServletRequest request) {
+    public BaseResponse<Page<Post>> listPostByPage(@RequestBody PostQueryRequest postQueryRequest, HttpServletRequest request) {
         if (postQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

@@ -2,7 +2,7 @@ package com.byc.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.byc.model.entity.User;
+import com.byc.common.model.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
 
