@@ -1,7 +1,7 @@
 package com.byc.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.byc.model.entity.InterfaceInfo;
+import com.byc.common.model.entity.InterfaceInfo;
 
 /**
 * @author buyic

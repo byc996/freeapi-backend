@@ -1,8 +1,7 @@
 package com.byc.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.byc.model.entity.InterfaceInfo;
-import com.byc.model.entity.Post;
+import com.byc.common.model.entity.InterfaceInfo;
 
 /**
 * @author buyic

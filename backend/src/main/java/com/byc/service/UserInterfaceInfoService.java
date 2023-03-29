@@ -1,8 +1,7 @@
 package com.byc.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.byc.model.entity.InterfaceInfo;
-import com.byc.model.entity.UserInterfaceInfo;
+import com.byc.common.model.entity.UserInterfaceInfo;
 
 /**
 * @author buyic
@@ -18,11 +17,4 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
      */
     void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add);
 
-    /**
-     *  调用接口统计
-     * @param interfaceInfoId
-     * @param userId
-     * @return
-     */
-    boolean increment(long interfaceInfoId, long userId);
 }

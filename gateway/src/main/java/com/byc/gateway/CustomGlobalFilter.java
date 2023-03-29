@@ -1,7 +1,13 @@
 package com.byc.gateway;
 
 import com.byc.clientsdk.utils.SignUtils;
+import com.byc.common.model.entity.InterfaceInfo;
+import com.byc.common.model.entity.User;
+import com.byc.common.service.InnerInterfaceInfoService;
+import com.byc.common.service.InnerUserInterfaceInfoService;
+import com.byc.common.service.InnerUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -35,15 +41,28 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
+    @DubboReference
+    private InnerUserService innerUserService;
+
+    @DubboReference
+    private InnerInterfaceInfoService innerInterfaceInfoService;
+
+    @DubboReference
+    private InnerUserInterfaceInfoService innerUserInterfaceInfoService;
+
     private static final List<String> IP_WHITE_LIST = Arrays.asList("127.0.0.1", "localhost");
+
+    private static final String INTERFACE_HOST = "http://localhost:8001";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 1. 请求日志
         ServerHttpRequest request = exchange.getRequest();
+        String path = INTERFACE_HOST + request.getPath().value();
+        String method = request.getMethod().toString();
         log.info("请求唯一标识: " + request.getId());
-        log.info("请求路径: " + request.getPath().value());
-        log.info("请求方法: " + request.getMethod());
+        log.info("请求路径: " + path);
+        log.info("请求方法: " + method);
         log.info("请求参数: " + request.getQueryParams());
         String remoteHost = request.getRemoteAddress().getHostName();
         log.info("请求来源地址: " + remoteHost);
@@ -60,26 +79,51 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         String timestamp = headers.getFirst("timestamp");
         String sign = headers.getFirst("sign");
         String body = headers.getFirst("body");
-        // todo 数据库中查ak是否已分配给用户
-        if (!accessKey.equals("harvey")) {
+        // 数据库中查ak是否已分配给用户
+            User invokeUser = null;
+        try {
+            invokeUser = innerUserService.getInvokeUser(accessKey);
+        } catch (Exception e) {
+            log.error("getInvokeUser error", e);
+        }
+        if (invokeUser == null) {
             return handleNoAuth(response);
         }
+        long userId = invokeUser.getId();
+//        if (!"harvey".equals(accessKey)){
+//            return handleNoAuth(response);
+//        }
         if (Long.parseLong(nonce) > 10000) {
             return handleNoAuth(response);
         }
-        // todo 时间和当前时间不能超过五分钟
+        // 时间和当前时间不能超过五分钟
         long currentTime = System.currentTimeMillis() / 1000;
         long FIVE_MINUTES = 60 * 5;
         if ((currentTime - Long.parseLong(timestamp)) > FIVE_MINUTES) {
             return handleNoAuth(response);
         }
-        // todo 数据库中根据accessKey 查询 secretKey
-        String serverSign = SignUtils.getSign(body, "12345678");
-        if (!sign.equals(serverSign)) {
+        // 数据库中根据accessKey 查询 secretKey
+
+        String secretKey = invokeUser.getSecretKey();
+        String serverSign = SignUtils.getSign(body, secretKey);
+        if (sign == null || !sign.equals(serverSign)) {
             return handleNoAuth(response);
         }
         // 4. 请求的模拟接口是否存在？
-        // todo 从数据库中查询模拟接口是否存在，以及请求方法是否匹配（还可以校验请求参数）
+        // 从数据库中查询模拟接口是否存在，以及请求方法是否匹配（还可以校验请求参数）
+        InterfaceInfo interfaceInfo = null;
+        try {
+            interfaceInfo = innerInterfaceInfoService.getInterfaceInfo(path, method);
+        } catch (Exception e) {
+            log.error("getInvokeUser error", e);
+        }
+        if (interfaceInfo == null) {
+            return handleNoAuth(response);
+        }
+        long interfaceInfoId = interfaceInfo.getId();
+
+        // todo 是否还有调用次数
+
         // 5. 请求转发，调用模拟接口
 
 
@@ -112,7 +156,11 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
                     if (response.getStatusCode() == HttpStatus.OK) {
                         // 7. todo 调用成功，接口调用次数+1 invokeCount
-
+                        try {
+                            innerUserInterfaceInfoService.increment(interfaceInfoId, userId);
+                        } catch (Exception e) {
+                            log.error("increment error", e);
+                        }
                     } else {
                         // 8. 调用失败，返回一个规范的错误
                         log.error("响应码异常：" + response.getStatusCode());
