@@ -80,7 +80,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         String sign = headers.getFirst("sign");
         String body = headers.getFirst("body");
         // 数据库中查ak是否已分配给用户
-            User invokeUser = null;
+        User invokeUser = null;
         try {
             invokeUser = innerUserService.getInvokeUser(accessKey);
         } catch (Exception e) {
@@ -130,7 +130,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         // 6. 响应日志
         // 通过response装饰器可以获取调用完后返回的response body， 并生成日志
         DataBufferFactory bufferFactory = response.bufferFactory();
-        ServerHttpResponseDecorator responseDecorator = new ServerHttpResponseDecorator(response){
+        ServerHttpResponseDecorator responseDecorator = new ServerHttpResponseDecorator(response) {
             @Override
             public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
                 if (body instanceof Flux) {
