@@ -19,6 +19,7 @@ spring:
     port: 6379
     host: redis
     database: 1
+    timeout: 5000
 server:
   port: 8080
   servlet:
