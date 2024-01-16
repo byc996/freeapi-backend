@@ -56,3 +56,6 @@ dubbo:
 #  accessKeyId: your-access-key-id
 #  secretKey: your-secret-key
 #  region: your-region
+gateway:
+  host: localhost
+  port: 8002

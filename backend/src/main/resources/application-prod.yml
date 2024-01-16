@@ -36,3 +36,7 @@ dubbo:
     name: dubbo-springboot-demo-provider
   registry:
     address: nacos://nacos:8848
+
+gateway:
+  host: buapi-gateway
+  port: 8002

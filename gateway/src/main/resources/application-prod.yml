@@ -6,7 +6,7 @@ spring:
     gateway:
       routes:
         - id: api_route
-          uri: lb://buinterface
+          uri: http://buapi-interface:8001
           predicates:
             - Path=/api/**
           filters:

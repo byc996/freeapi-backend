@@ -33,6 +33,7 @@ import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -67,6 +68,12 @@ public class InterfaceInfoController {
 
     @Resource
     private UserService userService;
+
+    @Value("${gateway.host}")
+    private String gatewayHost;
+
+    @Value("${gateway.port}")
+    private String gatewayPort;
 
 
     private static final String GATEWAY_HOST = "http://localhost:8002";
@@ -370,8 +377,10 @@ public class InterfaceInfoController {
         // 使用hutool工具类直接调用
         String result;
         String json = JSONUtil.toJsonStr(paramMap);
+        String url = String.format("http://%s:%s%s", gatewayHost, gatewayPort, interfaceInfo.getUrl());
+        System.out.println(url);
         if (RequestMethodEnum.POST.getValue().equals(method)) {
-            HttpResponse response = HttpRequest.post(interfaceInfo.getUrl())
+            HttpResponse response = HttpRequest.post(url)
 //                    .charset(StandardCharsets.UTF_8)
                     .addHeaders(getHeaders(accessKey, secretKey, interfaceInfo.getUrl(), interfaceInfo.getRequestHeader()) )
                     .body(json)
@@ -379,7 +388,7 @@ public class InterfaceInfoController {
             result = response.body();
             System.out.println(response);
         } else if (RequestMethodEnum.GET.getValue().equals(method)) {
-            HttpResponse response = HttpRequest.get(interfaceInfo.getUrl())
+            HttpResponse response = HttpRequest.get(url)
                     .addHeaders(getHeaders(accessKey, secretKey, interfaceInfo.getUrl(), interfaceInfo.getRequestHeader()) )
 //                    .charset(StandardCharsets.UTF_8)
                     .form(paramMap)
