@@ -46,6 +46,7 @@ create table if not exists buapi.`interface_info`
     `status` int default 0 not null comment '接口状态（0-关闭，1-开启）',
     `method` varchar(256) not null comment '请求类型',
     `userId` bigint not null comment '创建人',
+    `invokeNum` bigint not null default 0 comment '调用总次数',
     `createTime` datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     `updateTime` datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     `isDelete` tinyint default 0 not null comment '是否删除(0-未删, 1-已删)'
