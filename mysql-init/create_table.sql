@@ -66,6 +66,8 @@ create table if not exists buapi.`user_interface_info`
     `isDelete` tinyint default 0 not null comment '是否删除(0-未删, 1-已删)'
 ) comment '用户调用接口关系';
 
+insert into buapi.user (id, userName, userAccount, userAvatar, gender, userRole, userPassword, accessKey, secretKey, whiteList, createTime, updateTime, isDelete) values (3, null, 'admin', 'https://i.pravatar.cc/150?img=3', null, 'admin', '227ac5ac726e5d6e3881da7cc889aff4', '2178128597dff8d4240304e92561efbf', 'c431e8d4de79e589009743d5404bbf1d', null, '2023-03-12 15:34:43', '2024-01-15 18:40:00', 0);
+
 
 insert into buapi.interface_info (id, name, invokeMethodName, method, url, brief, description, image, type, category, requestParams, requestHeader, responseHeader, status, userId, invokeNum, createTime, updateTime, isDelete) values (1, '获取用户名', null, 'POST', 'http://localhost:8002/api/name/user', '获取用户名', '获取用户名', '"53bbbecde8700ec7d0d11ecb984401c4"', '免费', '其他', '[{"value":"harvey","type":"string","required":"是","name":"username"}]', '[{"key":"Content-Type","value":"application/json"}]', '[{"key":"Content-Type","value":"application/json"}]', 1, 3, 12, '2023-03-12 15:41:01', '2024-01-15 20:11:41', 0);
 insert into buapi.interface_info (id, name, invokeMethodName, method, url, brief, description, image, type, category, requestParams, requestHeader, responseHeader, status, userId, invokeNum, createTime, updateTime, isDelete) values (2, '接口2', null, 'POST', 'http://www.example.com/api/2', null, '这是接口2的描述', null, '免费', '趣味娱乐', null, '', '', 0, 2, 0, '2022-01-02 00:00:00', '2024-01-14 10:49:30', 1);
