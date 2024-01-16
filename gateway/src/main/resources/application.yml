@@ -12,7 +12,11 @@ spring:
           filters:
             - AddRequestHeader=gateway, 123456
             - AddRequestParameter=color, blue
-
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  main:
+    web-application-type: reactive
 logging:
   level:
     org:

@@ -4,7 +4,7 @@ spring:
   # DataSource Config
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/buapi
+    url: jdbc:mysql://mysql:3306/buapi
     username: root
     password: 12345678
   mvc:
@@ -13,15 +13,16 @@ spring:
   # session 失效时间（分钟）
   session:
     timeout: 86400
-    store-type: none
+    store-type: redis
+  # redis 配置
+  redis:
+    port: 6379
+    host: redis
+    database: 10
 server:
   port: 8080
   servlet:
     context-path: /api
-  ssl:
-    key-store: classpath:api-backend.p12
-    key-alias: api-backend
-    key-store-password: 123456
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -39,4 +40,4 @@ dubbo:
   application:
     name: dubbo-springboot-demo-provider
   registry:
-    address: nacos://localhost:8848
+    address: nacos://nacos:8848

@@ -1,4 +1,7 @@
-package com.byc.common;
+package com.byc.common.model;
+
+import com.byc.common.model.BaseResponse;
+import com.byc.common.model.ErrorCode;
 
 /**
  * 返回工具类

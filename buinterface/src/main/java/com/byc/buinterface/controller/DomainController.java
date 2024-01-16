@@ -1,16 +1,20 @@
 package com.byc.buinterface.controller;
 
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
 import com.byc.buinterface.model.DomainVO;
-import com.byc.clientsdk.model.Domain;
-import com.byc.clientsdk.model.IP;
-import com.byc.clientsdk.model.User;
+import com.byc.buinterface.model.dto.IPLocation;
+import com.byc.common.model.BaseResponse;
+import com.byc.common.model.ErrorCode;
+import com.byc.common.model.ResultUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,28 +25,35 @@ public class DomainController {
 
     private static final Map<String, String> codeMap = new HashMap<String, String>(){
         {
-            put("210", "Domain name is available");
-            put("211", "Domain name is not available");
-            put("212", "Domain name is invalid");
-            put("213", "Time out");
+            put("210", "该域名还没被注册，可用");
+            put("211", "该域名已被注册");
+            put("212", "该域名无效");
+            put("213", "超时");
         }
     };
 
+    //https://ip-api.com/docs/api:json#test
     @GetMapping("/ip")
-    public String getIPInfo(@RequestBody IP ip) {
+    public BaseResponse<IPLocation> getIPInfo(@RequestParam String ip) {
+        ip = ip.trim();
+        if (!isValidIP(ip)) {
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR, "ip格式有误");
+        }
         HashMap<String, Object> paramMap = new HashMap<>();
-        paramMap.put("lang", ip.getLang());
-        String resp = HttpUtil.get( "http://ip-api.com/json/" + ip.getIp(), paramMap);
-        return resp;
+        paramMap.put("lang", "zh-CN");
+        String resp = HttpUtil.get( "http://ip-api.com/json/" + ip, paramMap);
+        IPLocation ipLocation = JSONUtil.toBean(resp, IPLocation.class);
+        return ResultUtils.success(ipLocation);
     }
 
+    // https://developer.aliyun.com/article/657579
     @GetMapping("/exist")
-    public DomainVO getDomainStatus(@RequestBody Domain domain) {
+    public BaseResponse<DomainVO> getDomainStatus(@RequestParam String domain) {
         HashMap<String, Object> paramMap = new HashMap<>();
-        paramMap.put("area_domain", domain.getDomain());
+        paramMap.put("area_domain", domain);
         String resp = HttpUtil.get("http://panda.www.net.cn/cgi-bin/check.cgi", paramMap);
         DomainVO domainVO = new DomainVO();
-        domainVO.setDomain(domain.getDomain());
+        domainVO.setDomain(domain);
         try {
             Document doc = DocumentHelper.parseText(resp);
             Element roots = doc.getRootElement();
@@ -61,8 +72,26 @@ public class DomainController {
         } catch (DocumentException e) {
             throw new RuntimeException(e);
         }
-        return domainVO;
+        return ResultUtils.success(domainVO);
     }
 
 
+    public static boolean isValidIP(String ipAddress) {
+        try {
+            InetAddress inetAddress = InetAddress.getByName(ipAddress);
+            return inetAddress.getHostAddress().equals(ipAddress);
+        } catch (UnknownHostException e) {
+            return false;
+        }
+    }
+
+    public static void main(String[] args) {
+        String ipAddressToCheck = "192.168.12";
+
+        if (isValidIP(ipAddressToCheck)) {
+            System.out.println(ipAddressToCheck + " is a valid IP address.");
+        } else {
+            System.out.println(ipAddressToCheck + " is not a valid IP address.");
+        }
+    }
 }

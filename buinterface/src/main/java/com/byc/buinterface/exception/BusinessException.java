@@ -1,6 +1,7 @@
-package com.byc.exception;
+package com.byc.buinterface.exception;
 
-import com.byc.common.ErrorCode;
+
+import com.byc.common.model.ErrorCode;
 
 /**
  * 自定义异常类

@@ -1,8 +1,9 @@
 package com.byc.buinterface.controller;
 
 
-import com.byc.clientsdk.model.User;
-import com.byc.clientsdk.utils.SignUtils;
+import com.byc.buinterface.model.User;
+import com.byc.common.model.BaseResponse;
+import com.byc.common.model.ResultUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,9 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 public class NameController {
 
     @GetMapping("/get")
-    public String getName(String name, HttpServletRequest request) {
-        System.out.println(request.getHeader("gateway"));
-        return "GET Your name is :" + name;
+    public BaseResponse<String> getName(String name) {
+        String result =  "GET Your name is :" + name;
+        return ResultUtils.success(result);
     }
 
     @PostMapping("/post")
@@ -23,7 +24,7 @@ public class NameController {
     }
 
     @PostMapping("/user")
-    public String getUserNamePost(@RequestBody User user, HttpServletRequest request) {
+    public BaseResponse<String> getUserNamePost(@RequestBody User user, HttpServletRequest request) {
 //        String accessKey = request.getHeader("accessKey");
 //        String nonce = request.getHeader("nonce");
 //        String timestamp = request.getHeader("timestamp");
@@ -46,6 +47,6 @@ public class NameController {
         String result = " POST Username is :" + user.getUsername();
 
         // 调用成功后， 次数 + 1
-        return result;
+        return ResultUtils.success(result);
     }
 }

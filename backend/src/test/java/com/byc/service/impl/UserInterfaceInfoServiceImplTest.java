@@ -30,7 +30,7 @@ public class UserInterfaceInfoServiceImplTest {
 
     @Test
     public void increment() {
-        boolean b = innerUserInterfaceInfoService.increment(1, 2);
+        boolean b = innerUserInterfaceInfoService.increment(1, 2, "限次");
         Assertions.assertTrue(b);
     }
 }

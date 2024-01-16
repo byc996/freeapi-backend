@@ -1,8 +1,8 @@
+spring:
+  application:
+    name: buinterface
+
 server:
   port: 8001
   servlet:
     context-path: /api
-buapi:
-  client:
-    access-key: harvey
-    secret-key: 12345678

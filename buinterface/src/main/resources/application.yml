@@ -1,8 +1,20 @@
+spring:
+  application:
+    name: buinterface
+
 server:
   port: 8001
   servlet:
     context-path: /api
+#spring:
+#  # DataSource Config
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/buapi
+#    username: root
+#    password: root
 #buapi:
 #  client:
 #    access-key: harvey
 #    secret-key: 12345678
+

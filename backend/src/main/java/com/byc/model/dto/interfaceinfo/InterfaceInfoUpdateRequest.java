@@ -25,6 +25,26 @@ public class InterfaceInfoUpdateRequest implements Serializable {
     private String name;
 
     /**
+     * 简介
+     */
+    private String brief;
+
+    /**
+     * 接口类型 （免费，限次）
+     */
+    private String type;
+
+    /**
+     * 接口种类（趣味娱乐，功能应用）
+     */
+    private String category;
+
+    /**
+     * 调用方法名
+     */
+    private String invokeMethodName;
+
+    /**
      * 描述
      */
     private String description;

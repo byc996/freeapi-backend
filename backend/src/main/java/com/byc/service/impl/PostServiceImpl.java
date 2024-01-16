@@ -1,9 +1,9 @@
 package com.byc.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.byc.exception.BusinessException;
+import com.byc.common.exception.BusinessException;
+import com.byc.common.model.ErrorCode;
 import com.byc.service.PostService;
-import com.byc.common.ErrorCode;
 import com.byc.mapper.PostMapper;
 import com.byc.model.entity.Post;
 import com.byc.model.enums.PostGenderEnum;

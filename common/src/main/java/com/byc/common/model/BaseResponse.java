@@ -1,4 +1,4 @@
-package com.byc.common;
+package com.byc.common.model;
 
 import lombok.Data;
 

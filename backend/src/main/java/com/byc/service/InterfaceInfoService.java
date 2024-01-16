@@ -1,5 +1,6 @@
 package com.byc.service;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.byc.common.model.entity.InterfaceInfo;
 
@@ -16,4 +17,6 @@ public interface InterfaceInfoService extends IService<InterfaceInfo> {
      * @param add 是否为创建校验
      */
     void validInterfaceInfo(InterfaceInfo interfaceInfo, boolean add);
+
+    void updateInterface(UpdateWrapper<InterfaceInfo> updateWrapper);
 }

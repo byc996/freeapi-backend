@@ -2,9 +2,9 @@ package com.byc.aop;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.byc.annotation.AuthCheck;
-import com.byc.common.ErrorCode;
+import com.byc.common.exception.BusinessException;
+import com.byc.common.model.ErrorCode;
 import com.byc.common.model.entity.User;
-import com.byc.exception.BusinessException;
 import com.byc.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;

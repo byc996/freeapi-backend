@@ -1,17 +1,22 @@
 package com.byc.controller;
 
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.byc.common.model.BaseResponse;
+import com.byc.common.model.ResultUtils;
 import com.byc.common.model.entity.User;
 import com.byc.model.dto.user.*;
+import com.byc.model.vo.UserKeyVO;
 import com.byc.model.vo.UserVO;
-import com.byc.common.BaseResponse;
 import com.byc.common.DeleteRequest;
-import com.byc.common.ErrorCode;
-import com.byc.common.ResultUtils;
-import com.byc.exception.BusinessException;
+import com.byc.common.exception.BusinessException;
+import com.byc.common.model.ErrorCode;
 import com.byc.service.UserService;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +25,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 /**
  * 用户接口
@@ -32,6 +38,13 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+    /**
+     * 盐值，混淆密码
+     */
+    private static final String SALT = "byc";
+
+    private final static Gson GSON = new Gson();
 
     // region 登录相关
 
@@ -104,6 +117,55 @@ public class UserController {
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
         return ResultUtils.success(userVO);
+    }
+
+    @GetMapping("/get/login/key")
+    public BaseResponse<UserKeyVO> getLoginUserWithKey(HttpServletRequest request) {
+        User user = userService.getLoginUser(request);
+        UserKeyVO userVO = new UserKeyVO();
+        BeanUtils.copyProperties(user, userVO);
+//        if (StringUtils.isNotBlank())
+        userVO.setWhiteList(JSONUtil.toList(user.getWhiteList(), String.class));
+        return ResultUtils.success(userVO);
+    }
+
+    @GetMapping("/update/key")
+    public BaseResponse<Boolean> updateUserKey(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        User user = new User();
+        user.setId(loginUser.getId());
+        String accessKey = DigestUtil.md5Hex(SALT + user.getUserAccount() + RandomUtil.randomNumbers(5));
+        String secretKey = DigestUtil.md5Hex(SALT + user.getUserAccount() + RandomUtil.randomNumbers(8));
+        user.setAccessKey(accessKey);
+        user.setSecretKey(secretKey);
+        boolean b = userService.updateById(user);
+        if (!b) throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新失败");
+        return ResultUtils.success(b);
+    }
+
+    /**
+     * 更新用户 ip 白名单
+     *
+     * @param userWhiteListUpdateRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/update/white-list")
+    public BaseResponse<Boolean> updateUserWhiteList(@RequestBody UserWhiteListUpdateRequest userWhiteListUpdateRequest, HttpServletRequest request) {
+        if (userWhiteListUpdateRequest == null || userWhiteListUpdateRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        User user = new User();
+        user.setId(loginUser.getId());
+        BeanUtils.copyProperties(userWhiteListUpdateRequest, user);
+        List<String> whiteList = userWhiteListUpdateRequest.getWhiteList();
+
+        if (whiteList != null) {
+            user.setWhiteList(GSON.toJson(whiteList));
+        }
+        boolean result = userService.updateById(user);
+        return ResultUtils.success(result);
     }
 
     // endregion

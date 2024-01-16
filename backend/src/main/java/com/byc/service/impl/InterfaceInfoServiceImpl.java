@@ -1,13 +1,16 @@
 package com.byc.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.byc.common.ErrorCode;
 import com.byc.common.model.entity.InterfaceInfo;
-import com.byc.exception.BusinessException;
+import com.byc.common.exception.BusinessException;
+import com.byc.common.model.ErrorCode;
 import com.byc.mapper.InterfaceInfoMapper;
 import com.byc.service.InterfaceInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
 * @author buyic
@@ -17,6 +20,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, InterfaceInfo>
     implements InterfaceInfoService {
+
+    @Resource
+    private InterfaceInfoMapper interfaceInfoMapper;
 
     @Override
     public void validInterfaceInfo(InterfaceInfo interfaceInfo, boolean add) {
@@ -39,6 +45,11 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         if (StringUtils.isNotBlank(name) && name.length() > 50) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "名称过长");
         }
+    }
+
+    @Override
+    public void updateInterface(UpdateWrapper<InterfaceInfo> updateWrapper) {
+        interfaceInfoMapper.update(null, updateWrapper);
     }
 }
 

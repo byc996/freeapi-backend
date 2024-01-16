@@ -59,6 +59,12 @@ public class User implements Serializable {
      * secretKey
      */
     private String secretKey;
+
+    /**
+     * ip 白名单
+     */
+    private String whiteList;
+
     /**
      * 创建时间
      */

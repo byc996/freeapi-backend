@@ -5,12 +5,12 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
-import com.byc.clientsdk.model.Domain;
-import com.byc.clientsdk.model.IP;
-import com.byc.clientsdk.model.User;
+import com.byc.clientsdk.model.*;
+import com.byc.clientsdk.utils.HeaderUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.byc.clientsdk.utils.SignUtils.getSign;
@@ -52,34 +52,23 @@ public class BuClient {
 
     public String getUsernameByPost(User user) {
         String json = JSONUtil.toJsonStr(user);
-        HttpResponse response = HttpRequest.post(GATEWAY_HOST + "/api/name/user")
-                .charset(StandardCharsets.UTF_8)
-                .addHeaders(getHeaders(json) )
+        String url = GATEWAY_HOST + "/api/name/user";
+        HttpResponse response = HttpRequest.post(url)
+//                    .charset(StandardCharsets.UTF_8)
+                .addHeaders(HeaderUtils.getHeaders(accessKey, secretKey, url, ""))
                 .body(json)
                 .execute();
-        System.out.println(response.getStatus());
-        System.out.println(response.body());
         return response.body();
     }
 
-    private Map<String, String> getHeaders(String body) {
-        Map<String, String> map = new HashMap<>();
-        map.put("accessKey", accessKey);
-        // 一定不能发送给后端
-//        map.put("secretKey", secretKey);
 
-        map.put("nonce", RandomUtil.randomNumbers(4));
-        map.put("body", body);
-        map.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        map.put("sign", getSign(body, secretKey));
-        return map;
-    }
 
     public String getDomainStatus(Domain domain) {
         //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
         String json = JSONUtil.toJsonStr(domain);
-        HttpResponse response = HttpRequest.get(GATEWAY_HOST + "/api/domain/exist")
-                .addHeaders(getHeaders(json) )
+        String url = GATEWAY_HOST + "/api/domain/exist";
+        HttpResponse response = HttpRequest.get(url)
+                .addHeaders(HeaderUtils.getHeaders(accessKey, secretKey, url, ""))
                 .body(json)
                 .execute();
 //        System.out.println(result);
@@ -88,11 +77,30 @@ public class BuClient {
 
     public String getIPInfo(IP ip) {
         String json = JSONUtil.toJsonStr(ip);
-        HttpResponse response = HttpRequest.get(GATEWAY_HOST + "/api/domain/ip")
-                .addHeaders(getHeaders(json) )
+        String url = GATEWAY_HOST + "/api/domain/ip";
+        HttpResponse response = HttpRequest.get(url)
+                .addHeaders(HeaderUtils.getHeaders(accessKey, secretKey, url, ""))
                 .body(json)
                 .execute();
         return response.body();
     }
+
+//    private Map<String, String> getHeaders(String url, String requestHeader) {
+//        Map<String, String> map = new HashMap<>();
+//        if (StringUtils.isNotBlank(requestHeader)) {
+//            List<HeaderEntry> headerEntries = JSONUtil.toList(requestHeader, HeaderEntry.class);
+//            for (HeaderEntry headerEntry: headerEntries) {
+//                map.put(headerEntry.getKey(), headerEntry.getValue());
+//            }
+//        }
+//        map.put("accessKey", this.accessKey);
+//        // 一定不能发送给后端
+////        map.put("secretKey", secretKey);
+//        map.put("nonce", RandomUtil.randomNumbers(4));
+//        map.put("url", url);
+//        map.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+//        map.put("sign", getSign(url, this.secretKey));
+//        return map;
+//    }
 
 }

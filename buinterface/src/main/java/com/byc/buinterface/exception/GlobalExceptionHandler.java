@@ -1,8 +1,8 @@
-package com.byc.exception;
+package com.byc.buinterface.exception;
 
-import com.byc.common.BaseResponse;
-import com.byc.common.ErrorCode;
-import com.byc.common.ResultUtils;
+import com.byc.common.model.BaseResponse;
+import com.byc.common.model.ErrorCode;
+import com.byc.common.model.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

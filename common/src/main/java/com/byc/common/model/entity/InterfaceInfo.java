@@ -25,14 +25,39 @@ public class InterfaceInfo implements Serializable {
     private String name;
 
     /**
+     * 调用方法名
+     */
+    private String invokeMethodName;
+
+    /**
+     *  简介
+     */
+    private String brief;
+
+    /**
      * 描述
      */
     private String description;
 
     /**
+     * 图片地址
+     */
+    private String image;
+
+    /**
      * 接口地址
      */
     private String url;
+
+    /**
+     * 接口类型 （免费，限次）
+     */
+    private String type;
+
+    /**
+     * 接口种类（趣味娱乐，功能应用）
+     */
+    private String category;
 
     /**
      * 请求参数
@@ -64,6 +89,10 @@ public class InterfaceInfo implements Serializable {
      */
     private Long userId;
 
+    /**
+     * 调用次数
+     */
+    private Integer invokeNum;
     /**
      * 创建时间
      */

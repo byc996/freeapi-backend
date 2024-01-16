@@ -1,32 +1,56 @@
 package com.byc.controller;
 
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.byc.annotation.AuthCheck;
-import com.byc.clientsdk.client.BuClient;
 import com.byc.common.*;
+import com.byc.common.model.BaseResponse;
+import com.byc.common.model.ResultUtils;
 import com.byc.common.model.entity.InterfaceInfo;
 import com.byc.common.model.entity.User;
+import com.byc.common.model.entity.UserInterfaceInfo;
 import com.byc.constant.CommonConstant;
-import com.byc.exception.BusinessException;
+import com.byc.common.exception.BusinessException;
+import com.byc.common.model.ErrorCode;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoAddRequest;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.byc.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 
+import com.byc.model.entity.HeaderEntry;
+import com.byc.model.entity.ParamEntry;
 import com.byc.model.enums.InterfaceInfoStatusEnum;
+import com.byc.model.enums.RequestMethodEnum;
 import com.byc.service.InterfaceInfoService;
 import com.byc.service.UserService;
+import com.byc.utils.S3BucketUtils;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.lang.Nullable;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static com.byc.common.utils.SignUtils.getSign;
+
 
 /**
  * 帖子接口
@@ -44,8 +68,8 @@ public class InterfaceInfoController {
     @Resource
     private UserService userService;
 
-    @Resource
-    private BuClient buClient;
+
+    private static final String GATEWAY_HOST = "http://localhost:8002";
 
     // region 增删改查
 
@@ -57,7 +81,9 @@ public class InterfaceInfoController {
      * @return
      */
     @PostMapping("/add")
-    public BaseResponse<Long> addInterfaceInfo(@RequestBody InterfaceInfoAddRequest interfaceinfoAddRequest, HttpServletRequest request) {
+    public BaseResponse<Long> addInterfaceInfo(@RequestPart("image") Optional<MultipartFile> image,
+                                               InterfaceInfoAddRequest interfaceinfoAddRequest,
+                                               HttpServletRequest request) throws IOException {
         if (interfaceinfoAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -72,6 +98,19 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
         long newInterfaceInfoId = interfaceinfo.getId();
+        // upload image to s3
+        if (image.isPresent()) {
+            MultipartFile multipartFile = image.get();
+            File file = File.createTempFile(multipartFile.getName(), null);
+            multipartFile.transferTo(file);
+            String eTag = S3BucketUtils.uploadFileToS3("interface" + newInterfaceInfoId, file);
+            interfaceinfo.setImage(eTag);
+            boolean r = interfaceinfoService.updateById(interfaceinfo);
+            if (!r) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR);
+            }
+        }
+
         return ResultUtils.success(newInterfaceInfoId);
     }
 
@@ -110,8 +149,9 @@ public class InterfaceInfoController {
      * @return
      */
     @PostMapping("/update")
-    public BaseResponse<Boolean> updateInterfaceInfo(@RequestBody InterfaceInfoUpdateRequest interfaceinfoUpdateRequest,
-                                            HttpServletRequest request) {
+    public BaseResponse<Boolean> updateInterfaceInfo(@RequestPart("image") Optional<MultipartFile> image,
+                                                     InterfaceInfoUpdateRequest interfaceinfoUpdateRequest,
+                                                        HttpServletRequest request) throws IOException {
         if (interfaceinfoUpdateRequest == null || interfaceinfoUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -130,6 +170,19 @@ public class InterfaceInfoController {
         if (!oldInterfaceInfo.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
+        // upload image to s3
+        if (image.isPresent()) {
+            MultipartFile multipartFile = image.get();
+            File file = File.createTempFile(multipartFile.getName(), null);
+            multipartFile.transferTo(file);
+            String eTag = S3BucketUtils.uploadFileToS3("interface" + id, file);
+            interfaceinfo.setImage(eTag);
+        }
+//        else {
+//            UpdateWrapper<InterfaceInfo> updateWrapper = new UpdateWrapper<>();
+//            updateWrapper.eq("id", interfaceinfo.getId()).set("image", (Object) null);
+//            interfaceinfoService.updateInterface(updateWrapper);
+//        }
         boolean result = interfaceinfoService.updateById(interfaceinfo);
         return ResultUtils.success(result);
     }
@@ -157,8 +210,9 @@ public class InterfaceInfoController {
      */
     @AuthCheck(mustRole = "admin")
     @GetMapping("/list")
-    public BaseResponse<List<InterfaceInfo>> listInterfaceInfo(InterfaceInfoQueryRequest interfaceinfoQueryRequest) {
+    public BaseResponse<List<InterfaceInfo>> listInterfaceInfo(InterfaceInfoQueryRequest interfaceinfoQueryRequest, HttpServletRequest request) {
         InterfaceInfo interfaceinfoQuery = new InterfaceInfo();
+        User loginUser = userService.getLoginUser(request);
         if (interfaceinfoQueryRequest != null) {
             BeanUtils.copyProperties(interfaceinfoQueryRequest, interfaceinfoQuery);
         }
@@ -224,18 +278,18 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 判断是否可以调用
-        com.byc.clientsdk.model.User user = new com.byc.clientsdk.model.User();
-        user.setUsername("test");
-        String username;
-        try {
-            username = buClient.getUsernameByPost(user);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
-
-        if (StringUtils.isBlank(username)){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
-        }
+//        com.byc.clientsdk.model.User user = new com.byc.clientsdk.model.User();
+//        user.setUsername("test");
+//        String username;
+//        try {
+//            username = buClient.getUsernameByPost(user);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e.getMessage());
+//        }
+//
+//        if (StringUtils.isBlank(username)){
+//            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
+//        }
         // 仅本人或管理员可修改
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
@@ -288,35 +342,76 @@ public class InterfaceInfoController {
         // 判断是否存在
         long id = interfaceInfoInvokeRequest.getId();
         String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
-        InterfaceInfo oldInterfaceInfo = interfaceinfoService.getById(id);
-        if (oldInterfaceInfo == null) {
+        InterfaceInfo interfaceInfo = interfaceinfoService.getById(id);
+        if (interfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.CLOSED.getValue()) {
+        if (interfaceInfo.getStatus() == InterfaceInfoStatusEnum.CLOSED.getValue()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
         }
 
         User loginUser = userService.getLoginUser(request);
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
-        Gson gson = new Gson();
-        // 根据不同的url 调用不同的方法
-        BuClient tempClient = new BuClient(accessKey, secretKey);
-        String methodName = oldInterfaceInfo.getName();
-        Object result = null;
-        try {
-//            Method method = tempClient.getClass().getMethod(methodName);
-            for (Method method : tempClient.getClass().getMethods()) {
-                if (method.getName().equals(methodName)){
-                    Class<?>[] parameterTypes = method.getParameterTypes();
-                    Object args = gson.fromJson(userRequestParams, parameterTypes[0]);
-                    result = method.invoke(tempClient, args);
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        // 更新接口总调用次数
+        UpdateWrapper<InterfaceInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", interfaceInfo.getId());
+        updateWrapper.setSql("invokeNum = invokeNum + 1");
+        boolean update = interfaceinfoService.update(updateWrapper);
+        if (!update) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新总调用次数失败");
         }
+        String method = interfaceInfo.getMethod();
+        List<ParamEntry> paramEntries = JSONUtil.toList(userRequestParams, ParamEntry.class);
+        Map<String, Object> paramMap = new HashMap<>();
+        for (ParamEntry paramEntry : paramEntries) {
+            paramMap.put(paramEntry.getName(), paramEntry.getValue());
+        }
+        // 使用hutool工具类直接调用
+        String result;
+        String json = JSONUtil.toJsonStr(paramMap);
+        if (RequestMethodEnum.POST.getValue().equals(method)) {
+            HttpResponse response = HttpRequest.post(interfaceInfo.getUrl())
+//                    .charset(StandardCharsets.UTF_8)
+                    .addHeaders(getHeaders(accessKey, secretKey, interfaceInfo.getUrl(), interfaceInfo.getRequestHeader()) )
+                    .body(json)
+                    .execute();
+            result = response.body();
+            System.out.println(response);
+        } else if (RequestMethodEnum.GET.getValue().equals(method)) {
+            HttpResponse response = HttpRequest.get(interfaceInfo.getUrl())
+                    .addHeaders(getHeaders(accessKey, secretKey, interfaceInfo.getUrl(), interfaceInfo.getRequestHeader()) )
+//                    .charset(StandardCharsets.UTF_8)
+                    .form(paramMap)
+                    .execute();
+            result = response.body();
+        } else {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "request method："+ method + " 不存在");
+        }
+
+
+
+        // 根据不同的url 调用不同的方法  - 使用sdk调用
+//        BuClient tempClient = new BuClient(accessKey, secretKey);
+//        String methodName = oldInterfaceInfo.getName();
+//        Object result = null;
+//        try {
+////            Method method = tempClient.getClass().getMethod(methodName);
+//            for (Method method : tempClient.getClass().getMethods()) {
+//                if (method.getName().equals(methodName)){
+//                    Class<?>[] parameterTypes = method.getParameterTypes();
+//                    Object[] args = new Object[parameterTypes.length];
+//                    for (int i = 0; i < parameterTypes.length; i++) {
+//                        args[i] = gson.fromJson(userRequestParams, parameterTypes[0]);
+//                    }
+////                    Object args = gson.fromJson(userRequestParams, parameterTypes[0]);
+//                    result = method.invoke(tempClient, args);
+//                    break;
+//                }
+//            }
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
         return ResultUtils.success(result);
 
 //        com.byc.clientsdk.model.User user = gson.fromJson(userRequestParams, com.byc.clientsdk.model.User.class);
@@ -326,4 +421,21 @@ public class InterfaceInfoController {
 //        return ResultUtils.success(usernameByPost);
     }
 
+    private Map<String, String> getHeaders(String accessKey, String secretKey, String url, String requestHeader) {
+        Map<String, String> map = new HashMap<>();
+        if (StringUtils.isNotBlank(requestHeader)) {
+            List<HeaderEntry> headerEntries = JSONUtil.toList(requestHeader, HeaderEntry.class);
+            for (HeaderEntry headerEntry: headerEntries) {
+                map.put(headerEntry.getKey(), headerEntry.getValue());
+            }
+        }
+        map.put("accessKey", accessKey);
+        // 一定不能发送给后端
+//        map.put("secretKey", secretKey);
+        map.put("nonce", RandomUtil.randomNumbers(4));
+        map.put("url", url);
+        map.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        map.put("sign", getSign(url, secretKey));
+        return map;
+    }
 }

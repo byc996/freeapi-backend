@@ -3,18 +3,19 @@ package com.byc.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.byc.annotation.AuthCheck;
-import com.byc.common.BaseResponse;
 import com.byc.common.DeleteRequest;
-import com.byc.common.ErrorCode;
-import com.byc.common.ResultUtils;
+import com.byc.common.model.BaseResponse;
+import com.byc.common.model.ResultUtils;
 import com.byc.common.model.entity.User;
 import com.byc.common.model.entity.UserInterfaceInfo;
 import com.byc.constant.CommonConstant;
 import com.byc.constant.UserConstant;
-import com.byc.exception.BusinessException;
+import com.byc.common.exception.BusinessException;
+import com.byc.common.model.ErrorCode;
 import com.byc.model.dto.userinterfaceinfo.UserInterfaceInfoAddRequest;
 import com.byc.model.dto.userinterfaceinfo.UserInterfaceInfoQueryRequest;
 import com.byc.model.dto.userinterfaceinfo.UserInterfaceInfoUpdateRequest;
+import com.byc.model.vo.UserInterfaceInfoVO;
 import com.byc.service.UserInterfaceInfoService;
 import com.byc.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class UserInterfaceInfoController {
      * @return
      */
     @PostMapping("/add")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.DEFAULT_ROLE)
     public BaseResponse<Long> addUserInterfaceInfo(@RequestBody UserInterfaceInfoAddRequest userInterfaceInfoAddRequest, HttpServletRequest request) {
         if (userInterfaceInfoAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -53,9 +54,9 @@ public class UserInterfaceInfoController {
         UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
         BeanUtils.copyProperties(userInterfaceInfoAddRequest, userInterfaceInfo);
         // 校验
-        userInterfaceInfoService.validUserInterfaceInfo(userInterfaceInfo, true);
         User loginUser = userService.getLoginUser(request);
         userInterfaceInfo.setUserId(loginUser.getId());
+        userInterfaceInfoService.validUserInterfaceInfo(userInterfaceInfo, true);
         boolean result = userInterfaceInfoService.save(userInterfaceInfo);
         if (!result) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
@@ -137,8 +138,24 @@ public class UserInterfaceInfoController {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        UserInterfaceInfo interfaceinfo = userInterfaceInfoService.getById(id);
-        return ResultUtils.success(interfaceinfo);
+        UserInterfaceInfo interfaceInfo = userInterfaceInfoService.getById(id);
+        return ResultUtils.success(interfaceInfo);
+    }
+
+    /**
+     * 根据 id 获取
+     * @param interfaceId
+     * @return
+     */
+    @GetMapping("/get/single")
+    public BaseResponse<UserInterfaceInfo> getUserInterfaceInfoByInterfaceId(@RequestParam long interfaceId,
+                                                                             HttpServletRequest request) {
+        if (interfaceId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        UserInterfaceInfo interfaceInfo = userInterfaceInfoService.getUserInterfaceInfo(interfaceId, loginUser.getId());
+        return ResultUtils.success(interfaceInfo);
     }
 
     /**

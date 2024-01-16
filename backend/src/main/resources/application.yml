@@ -16,12 +16,12 @@ spring:
   # session 失效时间（分钟）
   session:
     timeout: 86400
-    store-type: none
+    store-type: redis
   # redis 配置
-#  redis:
-#    port: 6379
-#    host: localhost
-#    database: 0
+  redis:
+    port: 6379
+    host: localhost
+    database: 10
 server:
   port: 8080
   servlet:
@@ -50,3 +50,8 @@ dubbo:
     name: dubbo-springboot-demo-provider
   registry:
     address: nacos://localhost:8848
+
+#aws:
+#  accessKeyId: your-access-key-id
+#  secretKey: your-secret-key
+#  region: your-region

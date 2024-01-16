@@ -16,5 +16,13 @@ public interface InnerUserInterfaceInfoService {
      * @param userId
      * @return
      */
-    boolean increment(long interfaceInfoId, long userId);
+    boolean increment(long interfaceInfoId, long userId, String type);
+
+    /**
+     *  调用接口统计
+     * @param interfaceInfoId
+     * @param userId
+     * @return
+     */
+    int getRestNum(long interfaceInfoId, long userId, String type);
 }
