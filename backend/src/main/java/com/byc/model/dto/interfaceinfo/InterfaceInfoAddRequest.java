@@ -30,10 +30,6 @@ public class InterfaceInfoAddRequest implements Serializable {
      */
     private String category;
 
-    /**
-     * 调用方法名
-     */
-    private String invokeMethodName;
 
     /**
      *  简介

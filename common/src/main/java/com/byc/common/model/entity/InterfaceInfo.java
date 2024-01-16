@@ -24,10 +24,6 @@ public class InterfaceInfo implements Serializable {
      */
     private String name;
 
-    /**
-     * 调用方法名
-     */
-    private String invokeMethodName;
 
     /**
      *  简介

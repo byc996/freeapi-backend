@@ -39,10 +39,6 @@ public class InterfaceInfoUpdateRequest implements Serializable {
      */
     private String category;
 
-    /**
-     * 调用方法名
-     */
-    private String invokeMethodName;
 
     /**
      * 描述
