@@ -18,14 +18,14 @@ public class SessionConfig {
         return new MapSessionRepository(new ConcurrentHashMap<>());
     }
 
-    @Bean
-    DefaultCookieSerializerCustomizer cookieSerializerCustomizer() {
-        return new DefaultCookieSerializerCustomizer() {
-            @Override
-            public void customize(DefaultCookieSerializer cookieSerializer) {
-                cookieSerializer.setSameSite("None");
-                cookieSerializer.setUseSecureCookie(true); // 此项必须，否则set-cookie会被chrome浏览器阻拦
-            }
-        };
-    }
+//    @Bean
+//    DefaultCookieSerializerCustomizer cookieSerializerCustomizer() {
+//        return new DefaultCookieSerializerCustomizer() {
+//            @Override
+//            public void customize(DefaultCookieSerializer cookieSerializer) {
+//                cookieSerializer.setSameSite("None");
+//                cookieSerializer.setUseSecureCookie(false); // 此项必须，否则set-cookie会被chrome浏览器阻拦
+//            }
+//        };
+//    }
 }
