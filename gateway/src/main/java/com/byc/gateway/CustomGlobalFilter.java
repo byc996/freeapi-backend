@@ -1,7 +1,6 @@
 package com.byc.gateway;
 
 import cn.hutool.json.JSONUtil;
-import com.byc.clientsdk.utils.SignUtils;
 import com.byc.common.model.BaseResponse;
 import com.byc.common.model.ErrorCode;
 import com.byc.common.exception.BusinessException;
@@ -11,6 +10,7 @@ import com.byc.common.model.entity.User;
 import com.byc.common.service.InnerInterfaceInfoService;
 import com.byc.common.service.InnerUserInterfaceInfoService;
 import com.byc.common.service.InnerUserService;
+import com.byc.common.utils.SignUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.reactivestreams.Publisher;
