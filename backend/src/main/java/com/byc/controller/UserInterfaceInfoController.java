@@ -46,7 +46,6 @@ public class UserInterfaceInfoController {
      * @return
      */
     @PostMapping("/add")
-    @AuthCheck(mustRole = UserConstant.DEFAULT_ROLE)
     public BaseResponse<Long> addUserInterfaceInfo(@RequestBody UserInterfaceInfoAddRequest userInterfaceInfoAddRequest, HttpServletRequest request) {
         if (userInterfaceInfoAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
