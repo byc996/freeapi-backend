@@ -2,6 +2,7 @@ package com.byc.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.byc.common.model.entity.UserInterfaceInfo;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -13,6 +14,9 @@ import java.util.List;
 */
 public interface UserInterfaceInfoMapper extends BaseMapper<UserInterfaceInfo> {
     List<UserInterfaceInfo> listTopInvokeInterfaceInfo(int limit);
+
+    @Update("UPDATE user_interface_info SET restNum = 30 where isDelete = 0")
+    void refreshRestNum();
 }
 
 
