@@ -3,11 +3,11 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.byc</groupId>
-    <artifactId>free-api</artifactId>
+    <artifactId>freeapi-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>free-api</name>
-    <description>FreeAPI开放平台</description>
+    <name>freeapi-backend</name>
+    <description>FreeAPI接口平台后端</description>
     <modules>
         <module>backend</module>
         <module>buinterface</module>

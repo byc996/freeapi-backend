@@ -2,23 +2,17 @@ package com.byc.buinterface.controller;
 
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
-import com.byc.buinterface.client.OpenAIClient;
-import com.byc.buinterface.exception.BusinessException;
 import com.byc.buinterface.model.DomainVO;
 import com.byc.buinterface.model.dto.IPLocation;
-import com.byc.buinterface.model.dto.TextAbstractRequest;
 import com.byc.common.model.BaseResponse;
 import com.byc.common.model.ErrorCode;
 import com.byc.common.model.ResultUtils;
-import com.plexpt.chatgpt.entity.chat.Message;
-import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;

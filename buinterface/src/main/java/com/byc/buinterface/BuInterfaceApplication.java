@@ -11,10 +11,10 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 		DataSourceTransactionManagerAutoConfiguration.class,
 		HibernateJpaAutoConfiguration.class
 })
-public class BuinterfaceApplication {
+public class BuInterfaceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BuinterfaceApplication.class, args);
+		SpringApplication.run(BuInterfaceApplication.class, args);
 	}
 
 }
