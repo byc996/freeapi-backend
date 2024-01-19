@@ -29,8 +29,8 @@ public class GatewayApplication {
 //        return builder.routes()
 //                .route("tobaidu", r -> r.path("/baidu")
 //                        .uri("https://www.baidu.com"))
-//                .route("host_route", r -> r.path("/yupiicu")
-//                        .uri("http://yupi.icu"))
+//                .route("host_route", r -> r.path("/bc2996.com")
+//                        .uri("http://bc2996.com"))
 //                .build();
 //    }
 }
