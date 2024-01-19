@@ -6,6 +6,9 @@ server:
   port: 8001
   servlet:
     context-path: /api
+
+openai:
+  key: apiKey
 #spring:
 #  # DataSource Config
 #  datasource:

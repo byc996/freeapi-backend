@@ -3,30 +3,34 @@ package com.byc.utils;
 import java.io.File;
 import com.byc.common.exception.BusinessException;
 import com.byc.common.model.ErrorCode;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.*;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
+@Component
 public class S3BucketUtils {
 
-    // key name: s3
-    private static final String ACCESS_KEY = "AKIAW6K3DIQMMHULKSON";
-    private static final String SECRET_KEY = "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";
-
-    private static final String BUCKET_NAME = "buapi";
+    @Value("${s3.accessKey}")
+    private String ACCESS_KEY;
+    @Value("${s3.secretKey}")
+    private String SECRET_KEY ;
+    @Value("${s3.bucketName}")
+    private String BUCKET_NAME ;
     private static final Region REGION = Region.US_EAST_1;
 
-    private static S3Client s3Client = S3Client.builder()
-            .region(REGION)  // 替换成你的 S3 存储桶所在的 AWS 区域
-            .credentialsProvider(
-                    StaticCredentialsProvider.create(AwsBasicCredentials.create(ACCESS_KEY, SECRET_KEY))
-            )
-            .build();
 
+    public String uploadFileToS3(String bucketKey, File file) {
+        S3Client s3Client = S3Client.builder()
+                .region(REGION)  // 替换成你的 S3 存储桶所在的 AWS 区域
+                .credentialsProvider(
+                        StaticCredentialsProvider.create(AwsBasicCredentials.create(ACCESS_KEY, SECRET_KEY))
+                )
+                .build();
 
-    public static String uploadFileToS3(String bucketKey, File file) {
         try {
             PutObjectResponse response = s3Client.putObject(PutObjectRequest.builder()
                     .bucket(BUCKET_NAME)

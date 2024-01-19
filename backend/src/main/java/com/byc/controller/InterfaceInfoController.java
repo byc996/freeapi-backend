@@ -75,6 +75,9 @@ public class InterfaceInfoController {
     @Value("${gateway.port}")
     private String gatewayPort;
 
+    @Resource
+    private S3BucketUtils s3BucketUtils;
+
 
     private static final String GATEWAY_HOST = "http://localhost:8002";
 
@@ -110,7 +113,7 @@ public class InterfaceInfoController {
             MultipartFile multipartFile = image.get();
             File file = File.createTempFile(multipartFile.getName(), null);
             multipartFile.transferTo(file);
-            String eTag = S3BucketUtils.uploadFileToS3("interface" + newInterfaceInfoId, file);
+            String eTag = s3BucketUtils.uploadFileToS3("interface" + newInterfaceInfoId, file);
             interfaceinfo.setImage(eTag);
             boolean r = interfaceinfoService.updateById(interfaceinfo);
             if (!r) {
@@ -182,7 +185,7 @@ public class InterfaceInfoController {
             MultipartFile multipartFile = image.get();
             File file = File.createTempFile(multipartFile.getName(), null);
             multipartFile.transferTo(file);
-            String eTag = S3BucketUtils.uploadFileToS3("interface" + id, file);
+            String eTag = s3BucketUtils.uploadFileToS3("interface" + id, file);
             interfaceinfo.setImage(eTag);
         }
 //        else {

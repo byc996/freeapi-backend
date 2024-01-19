@@ -4,6 +4,7 @@ import com.plexpt.chatgpt.ChatGPT;
 import com.plexpt.chatgpt.entity.chat.ChatCompletion;
 import com.plexpt.chatgpt.entity.chat.ChatCompletionResponse;
 import com.plexpt.chatgpt.entity.chat.Message;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,19 +16,17 @@ import java.util.List;
 @Component
 public class OpenAIClient {
 
-    private static final String apiKey = "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";
+    @Value("${openai.key}")
+    private String apiKey;
 
-    private final ChatGPT chatGPT;
 
-    public OpenAIClient() {
-        chatGPT = ChatGPT.builder()
+    public String doChat(List<Message> messages) {
+
+        ChatGPT chatGPT = ChatGPT.builder()
                 .apiKey(apiKey)
                 .timeout(900)
                 .build()
                 .init();
-    }
-
-    public String doChat(List<Message> messages) {
 
         ChatCompletion chatCompletion = ChatCompletion.builder()
                 .model(ChatCompletion.Model.GPT_3_5_TURBO.getName())

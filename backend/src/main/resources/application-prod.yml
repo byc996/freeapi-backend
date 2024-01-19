@@ -40,3 +40,8 @@ dubbo:
 gateway:
   host: buapi-gateway
   port: 8002
+
+s3:
+  bucketName: bucketName
+  accessKey: accessKey
+  secretKey: secretKey

@@ -1,7 +1,7 @@
 .mysql-data
 .redis-data
 .nacos-data
-
+environment.yml
 
 HELP.md
 target/
